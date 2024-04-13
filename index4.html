@@ -51,6 +51,10 @@
   <div id="pointer-info">
     <label for="pointer-location">Pointer Location:</label>
     <input type="text" id="pointer-location" readonly>
+    <label for="latitude">Latitude:</label>
+    <input type="text" id="latitude" readonly>
+    <label for="longitude">Longitude:</label>
+    <input type="text" id="longitude" readonly>
   </div>
   <div id="iframe-info">
     <label for="iframe-link">Embedded Iframe Link:</label>
@@ -63,7 +67,6 @@
   
   <script>
     var marker;
-    var map;
     function initMap() {
       var usaBounds = {
         north: 49.384358,
@@ -72,17 +75,17 @@
         east: -66.93457,
       };
       
-      map = new google.maps.Map(document.getElementById('map'), {
+      var map = new google.maps.Map(document.getElementById('map'), {
         restriction: {
           latLngBounds: usaBounds,
           strictBounds: false,
         },
-        center: {lat: 40.7128, lng: -74.0060}, // Center of New York City
-        zoom: 10 // Adjust the zoom level as per your preference
+        center: {lat: 40.7128, lng: -74.0060},
+        zoom: 10
       });
 
       marker = new google.maps.Marker({
-        position: {lat: 40.7128, lng: -74.0060}, // Center of New York City
+        position: {lat: 40.7128, lng: -74.0060},
         map: map,
         draggable: true
       });
@@ -94,11 +97,18 @@
             if (results[0]) {
               var formattedAddress = results[0].formatted_address;
               document.getElementById('pointer-location').value = formattedAddress;
+              document.getElementById('latitude').value = event.latLng.lat();
+              document.getElementById('longitude').value = event.latLng.lng();
               // Construct and set the embedded iframe link
               var embedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3967.096781687173!2d" + event.latLng.lng() + "!3d" + event.latLng.lat() + "!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s" + encodeURIComponent(formattedAddress) + "!5e0!3m2!1sen!2sus!4v1712977602987";
               document.getElementById('iframe-link').value = embedUrl;
               // Set the iframe src attribute
               document.getElementById('embedded-map').src = embedUrl;
+              
+              // Check the map's zoom level
+              if (map.getZoom() >= 15) {
+                marker.setMap(null); // Remove the marker from the map
+              }
             } else {
               document.getElementById('pointer-location').value = 'No results found';
               document.getElementById('iframe-link').value = '';
@@ -113,29 +123,9 @@
           }
         });
       });
-      
-      // Add event listener for map bounds change
-      google.maps.event.addListener(map, 'bounds_changed', function() {
-        // Get the map bounds
-        var bounds = map.getBounds();
-        // Calculate the map area (in square meters)
-        var area = google.maps.geometry.spherical.computeArea(bounds);
-        // Convert square meters to square miles
-        var areaInMiles = area * 0.000000386102;
-        
-        // Check if the map area is greater than 5 miles
-        if (areaInMiles > 5) {
-          marker.setMap(null); // Remove the marker from the map
-        } else {
-          if (!marker.getMap()) {
-            marker.setMap(map); // Re-add the marker to the map
-          }
-        }
-      });
     }
   </script>
-
-
+ 
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDN9bX3mMiDdq4NsOs8ptWdoSYAnS349Uw&callback=initMap"></script>
 </body>
 </html>
