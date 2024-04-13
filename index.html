@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Move Pointer on Map</title>
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+    
+    #pointer-info {
+      margin-top: 10px;
+    }
+
+    #pointer-info label {
+      font-weight: bold;
+    }
+
+    #pointer-location {
+      width: 100%;
+      padding: 5px;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="pointer-info">
+    <label for="pointer-location">Pointer Location:</label>
+    <input type="text" id="pointer-location" readonly>
+  </div>
+  <script>
+    function initMap() {
+      var usaBounds = {
+        north: 49.384358,
+        south: 24.396308,
+        west: -125.0,
+        east: -66.93457,
+      };
+      
+      var map = new google.maps.Map(document.getElementById('map'), {
+        restriction: {
+          latLngBounds: usaBounds,
+          strictBounds: false,
+        },
+        center: {lat: 40.7128, lng: -74.0060}, // Center of New York City
+        zoom: 10 // Adjust the zoom level as per your preference
+      });
+
+      var marker = new google.maps.Marker({
+        position: {lat: 40.7128, lng: -74.0060}, // Center of New York City
+        map: map,
+        draggable: true
+      });
+
+      marker.addListener('dragend', function(event) {
+        var geocoder = new google.maps.Geocoder();
+        geocoder.geocode({'location': event.latLng}, function(results, status) {
+          if (status === 'OK') {
+            if (results[0]) {
+              var formattedAddress = results[0].formatted_address;
+              document.getElementById('pointer-location').value = formattedAddress;
+            } else {
+              document.getElementById('pointer-location').value = 'No results found';
+            }
+          } else {
+            document.getElementById('pointer-location').value = 'Geocoder failed due to: ' + status;
+          }
+        });
+      });
+    }
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDN9bX3mMiDdq4NsOs8ptWdoSYAnS349Uw&callback=initMap"></script>
+</body>
+</html>
